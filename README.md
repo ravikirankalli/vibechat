@@ -5,9 +5,9 @@ Users can create rooms, join rooms, and chat instantly with others.
 
 ---
 
-## 🚀 Features
+ Features
 
-### ✅ Frontend (React + Vite)
+ Frontend (React + Vite)
 - Clean and responsive UI  
 - Create/Delete chat rooms  
 - Join rooms and start chatting  
@@ -16,7 +16,7 @@ Users can create rooms, join rooms, and chat instantly with others.
 - Manage chat backgrounds  
 - Emoji + multimedia support (optional)  
 
-### ✅ Backend (Node.js + Express + Socket.io)
+ Backend (Node.js + Express + Socket.io)
 - Real-time communication  
 - Room-based chat  
 - Join/leave room events  
@@ -25,7 +25,7 @@ Users can create rooms, join rooms, and chat instantly with others.
 
 ---
 
-## 📂 Project Structure
+ Project Structure
 
 vibechat/
 │── chat-backend/ # Node.js + Express + Socket.io server
@@ -44,9 +44,9 @@ vibechat/
 
 ---
 
-## 🛠️ Installation & Setup
+ Installation & Setup
 
-### 1️⃣ Clone the repository
+ Clone the repository
 ```sh
 git clone https://github.com/your-username/VibeChat.git
 cd VibeChat
@@ -63,7 +63,7 @@ By default the backend runs on:
 
 http://localhost:5000
 
-💻 Frontend Setup (React + Vite)
+ Frontend Setup (React + Vite)
 Install dependencies:
 cd chat-frontend
 npm install
