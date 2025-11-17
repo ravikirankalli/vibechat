@@ -6,7 +6,10 @@ import RoomsList from './components/RoomsList';
 import ChatWindow from './components/ChatWindow';
 import './index.css';
 
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
+const SOCKET_URL = io("https://vibechat-innp.vercel.app/", {
+  path: "/api/socket",
+  transports: ["websocket"]
+});
 
 export default function App() {
   const [socket, setSocket] = useState(null);
