@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "functions": {
+    "api/socket.js": {
+      "runtime": "nodejs18.x"
+    }
+  },
+  "routes": [
+    {
+      "src": "/socket",
+      "dest": "/api/socket.js"
+    }
+  ]
+}
