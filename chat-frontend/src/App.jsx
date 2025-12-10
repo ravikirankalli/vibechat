@@ -1,59 +1,66 @@
 // src/App.jsx
-import React, { useEffect, useState } from 'react';
-import io from 'socket.io-client';
-import Login from './components/Login';
-import RoomsList from './components/RoomsList';
-import ChatWindow from './components/ChatWindow';
-import './index.css';
+import React, { useEffect, useState } from "react";
+import Login from "./components/Login";
+import RoomsList from "./components/RoomsList";
+import ChatWindow from "./components/ChatWindow";
+import "./index.css";
+import { io } from "socket.io-client";
 
-// Vercel backend URL 
-const SOCKET_URL = "https://vibechat-innp.vercel.app";
+// ✅ Single global socket connection
+const socketConnection = io("http://localhost:3000", {
+  transports: ["websocket"],
+});
 
 export default function App() {
-  const [socket, setSocket] = useState(null);
+  const [socket] = useState(socketConnection);
   const [username, setUsername] = useState(null);
   const [rooms, setRooms] = useState([]);
   const [currentRoom, setCurrentRoom] = useState(null);
   const [messages, setMessages] = useState([]);
   const [roomUsers, setRoomUsers] = useState([]);
 
-  // ✅ Correct WebSocket connection
+  // ----------------------------------------------------
+  // ✅ SOCKET.IO EVENT LISTENERS
+  // ----------------------------------------------------
   useEffect(() => {
-    const s = io(SOCKET_URL, {
-      path: "/api/socket",
-      transports: ["websocket"],  // force WebSocket instead of polling
+    if (!socket) return;
+
+    console.log("🔌 Socket connected:", socket.id);
+
+    // Rooms list update
+    socket.on("rooms_list", (roomsList) => {
+      setRooms(roomsList);
     });
 
-    setSocket(s);
-
-    // Listen to room list
-    s.on('rooms_list', (list) => setRooms(list));
-
-    // Listen to new messages
-    s.on('new_message', (message) => {
-      setMessages(prev => [...prev, message]);
+    // New message recieved
+    socket.on("new_message", (msg) => {
+      setMessages((prev) => [...prev, msg]);
     });
 
-    // Listen to users in the room
-    s.on('room_users', (users) => setRoomUsers(users));
+    // Room users update
+    socket.on("room_users", (users) => {
+      setRoomUsers(users);
+    });
 
-    return () => { 
-      s.disconnect();
+    return () => {
+      socket.off("rooms_list");
+      socket.off("new_message");
+      socket.off("room_users");
     };
-  }, []);
+  }, [socket]);
+
+  // ----------------------------------------------------
+  //   AUTH & ROOM FUNCTIONS
+  // ----------------------------------------------------
 
   // Set username
   const handleSetUsername = (name) => {
     return new Promise((resolve, reject) => {
-      if (!socket) return reject('No socket');
-
-      socket.emit('set_username', name, (res) => {
+      socket.emit("set_username", name, (res) => {
         if (res.success) {
           setUsername(res.username);
           resolve(res.username);
-        } else {
-          reject(res.error);
-        }
+        } else reject(res.error);
       });
     });
   };
@@ -61,9 +68,7 @@ export default function App() {
   // Create room
   const handleCreateRoom = (roomName) => {
     return new Promise((resolve, reject) => {
-      if (!socket) return reject('No socket');
-
-      socket.emit('create_room', roomName, (res) => {
+      socket.emit("create_room", roomName, (res) => {
         if (res.success) resolve(res.room);
         else reject(res.error);
       });
@@ -73,16 +78,12 @@ export default function App() {
   // Join room
   const handleJoinRoom = (roomName) => {
     return new Promise((resolve, reject) => {
-      if (!socket) return reject('No socket');
-
-      socket.emit('join_room', roomName, (res) => {
+      socket.emit("join_room", roomName, (res) => {
         if (res.success) {
           setCurrentRoom(res.room);
           setMessages(res.messages || []);
           resolve(res);
-        } else {
-          reject(res.error);
-        }
+        } else reject(res.error);
       });
     });
   };
@@ -90,9 +91,7 @@ export default function App() {
   // Send message
   const handleSendMessage = (text) => {
     return new Promise((resolve, reject) => {
-      if (!socket) return reject('No socket');
-
-      socket.emit('send_message', text, (res) => {
+      socket.emit("send_message", text, (res) => {
         if (res.success) resolve();
         else reject(res.error);
       });
@@ -101,9 +100,7 @@ export default function App() {
 
   // Leave room
   const handleLeaveRoom = () => {
-    if (!socket) return;
-
-    socket.emit('leave_room', (res) => {
+    socket.emit("leave_room", (res) => {
       if (res && res.success) {
         setCurrentRoom(null);
         setMessages([]);
@@ -112,16 +109,17 @@ export default function App() {
     });
   };
 
+  // ----------------------------------------------------
+  //   UI RENDER
+  // ----------------------------------------------------
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100">
       <div className="max-w-6xl mx-auto p-6">
-        
         {!username ? (
           <Login setUsername={handleSetUsername} />
         ) : (
           <div className="grid md:grid-cols-4 gap-4">
-            
-            {/* Rooms sidebar */}
+            {/* Rooms Panel */}
             <div className="md:col-span-1">
               <div className="bg-white dark:bg-slate-800 rounded-lg shadow p-4">
                 <div className="mb-4 text-sm">
@@ -137,7 +135,7 @@ export default function App() {
               </div>
             </div>
 
-            {/* Chat window */}
+            {/* Chat Window */}
             <div className="md:col-span-3">
               <div className="bg-white dark:bg-slate-800 rounded-lg shadow p-4">
                 <ChatWindow
@@ -149,7 +147,6 @@ export default function App() {
                 />
               </div>
             </div>
-
           </div>
         )}
       </div>
