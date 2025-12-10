@@ -1,0 +1,11 @@
+{
+  "projects": [],
+  "builds": [
+    {
+      "src": "chat-frontend/package.json",
+      "use": "@vercel/node"
+    }
+  ],
+  "framework": "vite",
+  "outputDirectory": "chat-frontend/dist"
+}

@@ -19,9 +19,9 @@ export default function App() {
   const [messages, setMessages] = useState([]);
   const [roomUsers, setRoomUsers] = useState([]);
 
-  // ----------------------------------------------------
-  // ✅ SOCKET.IO EVENT LISTENERS
-  // ----------------------------------------------------
+ 
+  //  SOCKET.IO EVENT LISTENERS
+
   useEffect(() => {
     if (!socket) return;
 
