@@ -6,9 +6,13 @@ import ChatWindow from "./components/ChatWindow";
 import "./index.css";
 import { io } from "socket.io-client";
 
-// ✅ Single global socket connection
+// ⭐ Global socket connection (Render backend)
 const socketConnection = io("https://vibechat-mpif.onrender.com", {
   transports: ["websocket"],
+  withCredentials: false,
+  reconnection: true,
+  reconnectionAttempts: 10,
+  reconnectionDelay: 1000
 });
 
 export default function App() {
@@ -19,41 +23,47 @@ export default function App() {
   const [messages, setMessages] = useState([]);
   const [roomUsers, setRoomUsers] = useState([]);
 
- 
-  //  SOCKET.IO EVENT LISTENERS
+  // -------------------------------
+  //   SOCKET.IO LISTENERS
+  // -------------------------------
 
   useEffect(() => {
     if (!socket) return;
 
-    console.log("🔌 Socket connected:", socket.id);
+    socket.on("connect", () => {
+      console.log("🔌 Connected:", socket.id);
+    });
 
-    // Rooms list update
+    socket.on("disconnect", () => {
+      console.log("❌ Disconnected");
+    });
+
     socket.on("rooms_list", (roomsList) => {
       setRooms(roomsList);
     });
 
-    // New message recieved
     socket.on("new_message", (msg) => {
       setMessages((prev) => [...prev, msg]);
     });
 
-    // Room users update
     socket.on("room_users", (users) => {
       setRoomUsers(users);
     });
 
+    // Cleanup listeners on unmount
     return () => {
+      socket.off("connect");
+      socket.off("disconnect");
       socket.off("rooms_list");
       socket.off("new_message");
       socket.off("room_users");
     };
   }, [socket]);
 
-  // ----------------------------------------------------
-  //   AUTH & ROOM FUNCTIONS
-  // ----------------------------------------------------
+  // -------------------------------
+  //   USER & ROOM ACTIONS
+  // -------------------------------
 
-  // Set username
   const handleSetUsername = (name) => {
     return new Promise((resolve, reject) => {
       socket.emit("set_username", name, (res) => {
@@ -65,7 +75,6 @@ export default function App() {
     });
   };
 
-  // Create room
   const handleCreateRoom = (roomName) => {
     return new Promise((resolve, reject) => {
       socket.emit("create_room", roomName, (res) => {
@@ -75,7 +84,6 @@ export default function App() {
     });
   };
 
-  // Join room
   const handleJoinRoom = (roomName) => {
     return new Promise((resolve, reject) => {
       socket.emit("join_room", roomName, (res) => {
@@ -88,7 +96,6 @@ export default function App() {
     });
   };
 
-  // Send message
   const handleSendMessage = (text) => {
     return new Promise((resolve, reject) => {
       socket.emit("send_message", text, (res) => {
@@ -98,10 +105,9 @@ export default function App() {
     });
   };
 
-  // Leave room
   const handleLeaveRoom = () => {
     socket.emit("leave_room", (res) => {
-      if (res && res.success) {
+      if (res?.success) {
         setCurrentRoom(null);
         setMessages([]);
         setRoomUsers([]);
@@ -109,9 +115,9 @@ export default function App() {
     });
   };
 
-  // ----------------------------------------------------
-  //   UI RENDER
-  // ----------------------------------------------------
+  // -------------------------------
+  //   UI
+  // -------------------------------
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100">
       <div className="max-w-6xl mx-auto p-6">
