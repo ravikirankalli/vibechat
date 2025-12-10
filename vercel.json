@@ -1,5 +1,5 @@
 {
-  "projects": [],
+  
   "builds": [
     {
       "src": "chat-frontend/package.json",
