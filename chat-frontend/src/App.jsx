@@ -7,7 +7,7 @@ import "./index.css";
 import { io } from "socket.io-client";
 
 // ✅ Single global socket connection
-const socketConnection = io("http://localhost:3000", {
+const socketConnection = io("https://vibechat-mpif.onrender.com", {
   transports: ["websocket"],
 });
 
