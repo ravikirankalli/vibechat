@@ -1,3 +1,5 @@
 serviceAccountKey.json
 serviceAccountKey.json.json
+node_modules
+dist
 .vercel

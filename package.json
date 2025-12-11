@@ -1,0 +1,6 @@
+{
+  "name": "vibechat-root",
+  "private": true,
+  "workspaces": ["chat-frontend", "chat-backend"],
+  "scripts": {}
+}
