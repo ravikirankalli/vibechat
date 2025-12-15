@@ -1,40 +1,27 @@
 // src/components/Message.jsx
-import React from 'react';
-import DOMPurify from 'dompurify';
+import React from "react";
 
-// small formatter that supports **bold**, _italic_, and transforms URLs into anchors
-function formatText(text) {
-  const escaped = text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-
-  let html = escaped.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-  html = html.replace(/_(.*?)_/g, '<em>$1</em>');
-  html = html.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
-  return DOMPurify.sanitize(html);
-}
-
-export default function Message({ message, myUsername }) {
-  const time = new Date(message.timestamp).toLocaleTimeString();
-  const isMine = message.username === myUsername;
-
+export default function Message({ message, isOwn }) {
   return (
     <div
-      className={`max-w-[85%] p-3 rounded-2xl ${
-        isMine
-          ? 'ml-auto bg-blue-600 text-white'
-          : 'bg-slate-100 text-slate-500 dark:bg-slate-800'
+      className={`flex ${
+        isOwn ? "justify-end" : "justify-start"
       }`}
     >
-      <div className="flex items-baseline justify-between gap-2">
-        <div className="text-xs font-semibold text-emerald-600">{message.username}</div>
-        <div className="text-[11px] text-slate-300">{time}</div>
-      </div>
       <div
-        className="mt-1 text-sm"
-        dangerouslySetInnerHTML={{ __html: formatText(message.text) }}
-      />
+        className={`max-w-xs md:max-w-sm px-4 py-2 rounded-2xl text-sm shadow ${
+          isOwn
+            ? "bg-gradient-to-br from-yellow-400 to-yellow-500 text-black rounded-br-none"
+            : "bg-white/20 backdrop-blur-md text-white rounded-bl-none"
+        }`}
+      >
+        {!isOwn && (
+          <div className="text-xs font-semibold text-purple-300 mb-1">
+            {message.username}
+          </div>
+        )}
+        <div className="break-words">{message.text}</div>
+      </div>
     </div>
   );
 }

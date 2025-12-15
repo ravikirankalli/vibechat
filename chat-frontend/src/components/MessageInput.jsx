@@ -1,31 +1,39 @@
 // src/components/MessageInput.jsx
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
-export default function MessageInput({ onSend }) {
-  const [text, setText] = useState('');
+export default function MessageInput({ sendMessage }) {
+  const [text, setText] = useState("");
 
-  const submit = async (e) => {
+  const handleSend = async (e) => {
     e.preventDefault();
-    const t = text.trim();
-    if (!t) return;
+    if (!text.trim()) return;
+
     try {
-      await onSend(t);
-      setText('');
+      await sendMessage(text);
+      setText("");
     } catch (err) {
-      console.error('send failed', err);
+      alert(err);
     }
   };
 
   return (
-    <form onSubmit={submit} className="mt-2">
-  <div className="flex gap-3 items-center">
-    <input
-      value={text}
-      onChange={(e)=>setText(e.target.value)}
-      className="flex-1 p-3 rounded-full border border-slate-200 bg-white dark:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-200"
-      placeholder="Write a message..."/>
-    <button className="px-4 py-2 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow">Send</button>
-  </div>
-</form>
+    <form
+      onSubmit={handleSend}
+      className="flex items-center gap-3 p-4 border-t border-white/10 bg-white/5 backdrop-blur-xl"
+    >
+      <input
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        placeholder="Type your message..."
+        className="flex-1 px-4 py-3 rounded-full bg-white/20 text-white placeholder-gray-300 border border-white/20 outline-none focus:ring-2 focus:ring-yellow-400/50 transition"
+      />
+
+      <button
+        type="submit"
+        className="bg-yellow-400 hover:bg-yellow-500 active:scale-95 text-black font-semibold px-6 py-3 rounded-full transition"
+      >
+        Send
+      </button>
+    </form>
   );
 }
