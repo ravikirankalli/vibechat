@@ -11,11 +11,10 @@ const Navbar = ({ username, setUsername }) => {
 
   return (
     <nav className="sticky top-0 z-50 bg-slate-900/90 backdrop-blur-md border-b border-white/10">
-      <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
         
         {/* Left */}
-        <div className="flex items-center gap-6">
-          {/* Logo */}
+        <div className="flex items-center gap-4">
           <Link
             to="/"
             className="text-2xl font-bold tracking-wide text-indigo-400 hover:text-indigo-300 transition"
@@ -23,10 +22,9 @@ const Navbar = ({ username, setUsername }) => {
             VibeChat
           </Link>
 
-          {/* Home button (always visible) */}
           <Link
             to="/"
-            className="px-4 py-1.5 rounded-lg text-sm font-medium text-white bg-white/5 hover:bg-indigo-500/20 hover:text-indigo-300 transition"
+            className="hidden sm:inline-block px-4 py-1.5 rounded-lg text-sm font-medium text-white bg-white/5 hover:bg-indigo-500/20 transition"
           >
             Home
           </Link>
@@ -43,30 +41,40 @@ const Navbar = ({ username, setUsername }) => {
             </Link>
           ) : (
             <>
+              {/* Username badge */}
+              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/10 border border-white/20">
+                <span className="w-7 h-7 flex items-center justify-center rounded-full bg-indigo-500 text-white font-bold text-sm">
+                  {username.charAt(0).toUpperCase()}
+                </span>
+                <span className="text-sm text-indigo-300 font-medium">
+                  {username}
+                </span>
+              </div>
+
               <Link
                 to="/create-room"
-                className="px-4 py-1.5 rounded-lg text-sm font-medium text-white bg-white/5 hover:bg-emerald-500/20 hover:text-emerald-300 transition"
+                className="px-3 py-1.5 rounded-lg text-sm text-white bg-white/5 hover:bg-emerald-500/20 transition"
               >
                 Create
               </Link>
 
               <Link
                 to="/rooms"
-                className="px-4 py-1.5 rounded-lg text-sm font-medium text-white bg-white/5 hover:bg-blue-500/20 hover:text-blue-300 transition"
+                className="px-3 py-1.5 rounded-lg text-sm text-white bg-white/5 hover:bg-blue-500/20 transition"
               >
                 Join
               </Link>
 
               <Link
                 to="/profile"
-                className="px-4 py-1.5 rounded-lg text-sm font-medium text-white bg-white/5 hover:bg-purple-500/20 hover:text-purple-300 transition"
+                className="px-3 py-1.5 rounded-lg text-sm text-white bg-white/5 hover:bg-purple-500/20 transition"
               >
                 Profile
               </Link>
 
               <button
                 onClick={handleLogout}
-                className="px-4 py-1.5 rounded-lg bg-red-500/80 hover:bg-red-600 text-white text-sm font-semibold transition shadow"
+                className="px-3 py-1.5 rounded-lg bg-red-500/80 hover:bg-red-600 text-white text-sm font-semibold transition"
               >
                 Logout
               </button>

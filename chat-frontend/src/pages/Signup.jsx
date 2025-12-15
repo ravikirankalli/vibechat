@@ -1,6 +1,6 @@
 // src/pages/Signup.jsx
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase";
 
@@ -14,24 +14,13 @@ export default function Signup({ setUsername, socket }) {
     e.preventDefault();
     setError("");
 
-    if (!email || !password) {
-      setError("Email and password are required");
-      return;
-    }
-
     if (password.length < 6) {
       setError("Password must be at least 6 characters");
       return;
     }
 
     try {
-      const userCred = await createUserWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-
-      // use email prefix as username
+      await createUserWithEmailAndPassword(auth, email, password);
       const username = email.split("@")[0];
 
       socket.emit("set_username", username, (res) => {
@@ -39,36 +28,29 @@ export default function Signup({ setUsername, socket }) {
           setError(res.error);
           return;
         }
-
         setUsername(username);
         navigate("/");
       });
     } catch (err) {
-      // 🔥 readable Firebase errors
-      if (err.code === "auth/email-already-in-use") {
-        setError("Email already registered");
-      } else if (err.code === "auth/invalid-email") {
-        setError("Invalid email address");
-      } else {
-        setError("Signup failed. Try again.");
-      }
+      setError("Signup failed. Try another email.");
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-indigo-900 to-purple-800 px-4">
-      <div className="w-full max-w-md bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-8 shadow-2xl">
-        <h2 className="text-3xl font-bold text-white text-center mb-6">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-indigo-900 to-purple-900 px-4">
+      <div className="w-full max-w-sm sm:max-w-md bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-6 sm:p-8 shadow-2xl">
+        
+        <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-6">
           Create Account 🚀
         </h2>
 
         {error && (
-          <div className="bg-red-500/20 border border-red-400/30 text-red-300 p-2 rounded-lg mb-4 text-center">
+          <div className="bg-red-500/20 border border-red-400/30 text-red-300 p-2 rounded-lg mb-4 text-center text-sm">
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSignup} className="space-y-5">
+        <form onSubmit={handleSignup} className="space-y-4">
           <input
             type="email"
             placeholder="Email address"
@@ -90,14 +72,15 @@ export default function Signup({ setUsername, socket }) {
           </button>
         </form>
 
+        {/* 🔥 Login link */}
         <p className="text-gray-300 text-sm text-center mt-6">
           Already have an account?{" "}
-          <span
-            onClick={() => navigate("/login")}
-            className="text-indigo-300 cursor-pointer hover:underline"
+          <Link
+            to="/login"
+            className="text-indigo-300 hover:underline font-medium"
           >
             Login
-          </span>
+          </Link>
         </p>
       </div>
     </div>
