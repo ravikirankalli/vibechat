@@ -9,36 +9,51 @@ app.use(cors());
 const server = http.createServer(app);
 
 const io = new Server(server, {
-  cors: { origin: "*", methods: ["GET", "POST"] },
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+  },
 });
 
-// rooms = { roomName: { owner, messages, users:Set } }
+/**
+ * rooms = {
+ *   roomName: {
+ *     owner: string,
+ *     messages: [],
+ *     users: Set
+ *   }
+ * }
+ */
 const rooms = {};
-const usernameToSocket = {};
 const socketToUser = {};
+
+// helper to send rooms
+const getRoomsPayload = () =>
+  Object.entries(rooms).map(([name, data]) => ({
+    name,
+    owner: data.owner,
+  }));
 
 io.on("connection", (socket) => {
   console.log("✔ Connected:", socket.id);
 
-  // ✅ send rooms on connect
-  socket.emit("rooms_list", Object.keys(rooms));
+  socket.emit("rooms_list", getRoomsPayload());
 
-  // ✅ allow frontend to request rooms anytime
   socket.on("get_rooms", () => {
-    socket.emit("rooms_list", Object.keys(rooms));
+    socket.emit("rooms_list", getRoomsPayload());
   });
 
   socket.on("set_username", (username, cb) => {
-    if (!username?.trim())
+    if (!username?.trim()) {
       return cb({ success: false, error: "Invalid username" });
+    }
 
-    if (usernameToSocket[username])
-      return cb({ success: false, error: "Username already taken" });
+    socketToUser[socket.id] = {
+      username,
+      room: null,
+    };
 
-    usernameToSocket[username] = socket.id;
-    socketToUser[socket.id] = { username, room: null };
-
-    cb({ success: true, username });
+    cb({ success: true });
   });
 
   socket.on("create_room", (roomName, cb) => {
@@ -56,8 +71,7 @@ io.on("connection", (socket) => {
       users: new Set(),
     };
 
-    // 🔥 broadcast updated rooms
-    io.emit("rooms_list", Object.keys(rooms));
+    io.emit("rooms_list", getRoomsPayload());
     cb({ success: true });
   });
 
@@ -71,24 +85,15 @@ io.on("connection", (socket) => {
       return cb({ success: false, error: "Only owner can delete room" });
 
     delete rooms[roomName];
-    io.emit("rooms_list", Object.keys(rooms));
+    io.emit("rooms_list", getRoomsPayload());
     cb({ success: true });
   });
 
   socket.on("join_room", (roomName, cb) => {
     const user = socketToUser[socket.id];
     if (!user) return cb({ success: false, error: "Unauthorized" });
-    if (!rooms[roomName]) return cb({ success: false, error: "Room not found" });
-
-    // leave previous room
-    if (user.room && rooms[user.room]) {
-      socket.leave(user.room);
-      rooms[user.room].users.delete(user.username);
-      io.to(user.room).emit(
-        "room_users",
-        [...rooms[user.room].users]
-      );
-    }
+    if (!rooms[roomName])
+      return cb({ success: false, error: "Room not found" });
 
     socket.join(roomName);
     rooms[roomName].users.add(user.username);
@@ -99,10 +104,7 @@ io.on("connection", (socket) => {
       messages: rooms[roomName].messages,
     });
 
-    io.to(roomName).emit(
-      "room_users",
-      [...rooms[roomName].users]
-    );
+    io.to(roomName).emit("room_users", [...rooms[roomName].users]);
   });
 
   socket.on("send_message", (text, cb) => {
@@ -123,24 +125,11 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
-    const user = socketToUser[socket.id];
-    if (!user) return;
-
-    if (user.room && rooms[user.room]) {
-      rooms[user.room].users.delete(user.username);
-      io.to(user.room).emit(
-        "room_users",
-        [...rooms[user.room].users]
-      );
-    }
-
-    delete usernameToSocket[user.username];
     delete socketToUser[socket.id];
-
     console.log("❌ Disconnected:", socket.id);
   });
 });
 
-server.listen(3000, () =>
-  console.log("🔥 Server running on http://localhost:3000")
-);
+server.listen(3000, () => {
+  console.log("🔥 Server running on http://localhost:3000");
+});

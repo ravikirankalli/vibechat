@@ -1,3 +1,4 @@
+// src/pages/Signup.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createUserWithEmailAndPassword } from "firebase/auth";
@@ -13,6 +14,11 @@ export default function Signup({ setUsername, socket }) {
     e.preventDefault();
     setError("");
 
+    if (!email || !password) {
+      setError("Email and password are required");
+      return;
+    }
+
     if (password.length < 6) {
       setError("Password must be at least 6 characters");
       return;
@@ -25,6 +31,7 @@ export default function Signup({ setUsername, socket }) {
         password
       );
 
+      // use email prefix as username
       const username = email.split("@")[0];
 
       socket.emit("set_username", username, (res) => {
@@ -37,12 +44,19 @@ export default function Signup({ setUsername, socket }) {
         navigate("/");
       });
     } catch (err) {
-      setError(err.message);
+      // 🔥 readable Firebase errors
+      if (err.code === "auth/email-already-in-use") {
+        setError("Email already registered");
+      } else if (err.code === "auth/invalid-email") {
+        setError("Invalid email address");
+      } else {
+        setError("Signup failed. Try again.");
+      }
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-indigo-900 to-purple-900 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-indigo-900 to-purple-800 px-4">
       <div className="w-full max-w-md bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-8 shadow-2xl">
         <h2 className="text-3xl font-bold text-white text-center mb-6">
           Create Account 🚀

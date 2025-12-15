@@ -10,44 +10,35 @@ export default function CreateRoom({ socket }) {
     e.preventDefault();
     setError("");
 
-    if (!roomName.trim()) {
-      setError("Room name is required");
-      return;
-    }
-
     socket.emit("create_room", roomName.trim(), (res) => {
-      if (res.success) {
-        // ✅ Go to rooms page (rooms will refresh correctly now)
-        navigate("/rooms");
-      } else {
+      if (!res.success) {
         setError(res.error);
+        return;
       }
+
+      navigate("/rooms");
     });
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-700 via-purple-700 to-pink-600 px-4">
-      <div className="w-full max-w-md bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-8 shadow-2xl">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-900 to-purple-900 flex items-center justify-center px-4">
+      <div className="w-full max-w-md bg-white/10 backdrop-blur-xl rounded-2xl p-8">
         <h2 className="text-2xl font-bold text-white mb-6 text-center">
-          Create a New Room 🚀
+          Create Room 🚀
         </h2>
 
-        {error && (
-          <div className="text-red-300 bg-red-500/20 border border-red-400/30 rounded-lg p-2 mb-4 text-center">
-            {error}
-          </div>
-        )}
+        {error && <p className="text-red-300 mb-4">{error}</p>}
 
-        <form onSubmit={createRoom} className="space-y-5">
+        <form onSubmit={createRoom} className="space-y-4">
           <input
             value={roomName}
             onChange={(e) => setRoomName(e.target.value)}
-            placeholder="Enter room name"
-            className="w-full px-4 py-3 rounded-xl bg-white/20 text-white placeholder-gray-300 border border-white/30 focus:ring-2 focus:ring-yellow-400 outline-none"
+            placeholder="Room name"
+            className="w-full px-4 py-3 rounded-xl bg-white/20 text-white"
           />
 
-          <button className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-semibold py-3 rounded-xl transition">
-            Create Room
+          <button className="w-full bg-yellow-400 py-3 rounded-xl font-semibold">
+            Create
           </button>
         </form>
       </div>

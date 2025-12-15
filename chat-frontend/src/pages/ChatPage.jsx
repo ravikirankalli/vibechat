@@ -12,33 +12,29 @@ export default function ChatPage({ username, socket }) {
   useEffect(() => {
     socket.emit("join_room", room, (res) => {
       if (!res.success) {
-        alert(res.error);
         navigate("/rooms");
-      } else {
-        setMessages(res.messages || []);
+        return;
       }
+      setMessages(res.messages || []);
     });
 
-    socket.on("new_message", (msg) => {
-      setMessages((prev) => [...prev, msg]);
-    });
+    socket.on("new_message", (msg) =>
+      setMessages((prev) => [...prev, msg])
+    );
 
-    socket.on("room_users", (usersList) => {
-      setUsers(usersList);
-    });
+    socket.on("room_users", setUsers);
 
     return () => {
-      socket.emit("leave_room", () => {});
       socket.off("new_message");
       socket.off("room_users");
     };
-  }, [room, navigate, socket]);
+  }, [room, socket, navigate]);
 
   const sendMessage = (text) =>
     new Promise((resolve, reject) => {
-      socket.emit("send_message", text, (res) => {
-        res.success ? resolve() : reject(res.error);
-      });
+      socket.emit("send_message", text, (res) =>
+        res.success ? resolve() : reject()
+      );
     });
 
   return (
