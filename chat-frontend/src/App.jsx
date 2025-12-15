@@ -14,7 +14,7 @@ import Signup from "./pages/Signup";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./utils/ProtectedRoute";
 
-const socket = io("http://localhost:3000", {
+const socket = io("https://vibechat-mpif.onrender.com", {
   transports: ["websocket"],
   reconnection: true,
   reconnectionAttempts: 10,
